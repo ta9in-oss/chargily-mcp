@@ -14,3 +14,7 @@ class_name = "ChargilyMCP"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["ChargilyMCP"]
+
+[[routes]]
+pattern = "mcp.ta9in.com/chargily-mcp*"
+zone_name = "ta9in.com"

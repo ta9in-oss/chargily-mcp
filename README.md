@@ -2,7 +2,11 @@
 
 A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for the [Chargily Pay V2 API](https://dev.chargily.com/pay-v2/introduction), hosted on Cloudflare Workers. Enables AI assistants to interact with Chargily Pay directly — create checkouts, manage customers, products, prices, and payment links.
 
-## Tools
+## MCP Endpoint
+
+```
+https://mcp.ta9in.com/chargily-mcp/mcp
+```
 
 | Tool | Description |
 |---|---|
@@ -82,7 +86,7 @@ Add to your `claude_desktop_config.json`:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://chargily-mcp.<your-account>.workers.dev/mcp"
+        "https://mcp.ta9in.com/chargily-mcp/mcp"
       ]
     }
   }

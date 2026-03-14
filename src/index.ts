@@ -518,13 +518,13 @@ export class ChargilyMCP extends McpAgent<Env> {
   }
 }
 
-const mcpHandler = ChargilyMCP.serve("/mcp");
+const mcpHandler = ChargilyMCP.serve("/chargily-mcp/mcp");
 
 export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const url = new URL(request.url);
 
-    if (url.pathname === "/health") {
+    if (url.pathname === "/chargily-mcp/health") {
       return new Response(JSON.stringify({ status: "ok", service: "chargily-mcp" }), {
         headers: { "Content-Type": "application/json" },
       });
