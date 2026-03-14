@@ -1,0 +1,22 @@
+{
+  "name": "chargily-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Chargily Pay API - hosted on Cloudflare Workers",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "agents": "^0.7.6",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250409.0",
+    "typescript": "^5.5.2",
+    "wrangler": "^4.13.2"
+  }
+}
