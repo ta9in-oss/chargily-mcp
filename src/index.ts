@@ -5,23 +5,49 @@ import { ChargilyClient } from "./chargily-client";
 import { DOCS, ALL_TOPICS, type DocTopic } from "./docs";
 
 export interface Env {
-  CHARGILY_API_KEY: string;
-  CHARGILY_MODE?: "test" | "live";
   MCP_OBJECT: DurableObjectNamespace;
 }
 
-export class ChargilyMCP extends McpAgent<Env> {
+interface AgentState {
+  apiKey: string;
+}
+
+const NO_KEY_MSG =
+  "⚠️  No Chargily API key found.\n\n" +
+  "Pass your key on every request via one of these headers:\n" +
+  "  • Authorization: Bearer <your_key>\n" +
+  "  • X-Chargily-Api-Key: <your_key>\n\n" +
+  "With mcp-remote, add to your MCP client config:\n" +
+  '  "args": ["mcp-remote", "https://mcp.ta9in.com/chargily-mcp/mcp",\n' +
+  '           "--header", "Authorization: Bearer ${CHARGILY_API_KEY}"]\n\n' +
+  "Then set CHARGILY_API_KEY in your environment / .env file.";
+
+export class ChargilyMCP extends McpAgent<Env, AgentState> {
   server = new McpServer({ name: "chargily-mcp", version: "1.0.0" });
 
+  // Intercept every DO request to capture the API key from headers.
+  override async fetch(request: Request): Promise<Response> {
+    const key =
+      request.headers.get("X-Chargily-Api-Key") ??
+      request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "") ??
+      null;
+
+    if (key && key !== this.state?.apiKey) {
+      await this.setState({ apiKey: key });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (super.fetch as any)(request);
+  }
+
   private getClient(): ChargilyClient {
-    return new ChargilyClient({
-      apiKey: this.env.CHARGILY_API_KEY,
-      mode: (this.env.CHARGILY_MODE as "test" | "live") ?? "test",
-    });
+    const apiKey = this.state?.apiKey;
+    if (!apiKey) throw new Error(NO_KEY_MSG);
+    const mode = apiKey.startsWith("live_sk_") ? "live" : "test";
+    return new ChargilyClient({ apiKey, mode });
   }
 
   async init() {
-
     this.server.tool(
       "get_documentation",
       "Get Chargily Pay API documentation for a specific topic. Use this to understand available endpoints, request parameters, response fields, and integration patterns before making API calls.",

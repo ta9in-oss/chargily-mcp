@@ -3,10 +3,6 @@ main = "src/index.ts"
 compatibility_date = "2025-03-01"
 compatibility_flags = ["nodejs_compat"]
 
-[vars]
-# CHARGILY_API_KEY should be set as a secret via:
-# wrangler secret put CHARGILY_API_KEY
-
 [[durable_objects.bindings]]
 name = "MCP_OBJECT"
 class_name = "ChargilyMCP"

@@ -1,12 +1,44 @@
 # Chargily MCP
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for the [Chargily Pay V2 API](https://dev.chargily.com/pay-v2/introduction), hosted on Cloudflare Workers. Enables AI assistants to interact with Chargily Pay directly — create checkouts, manage customers, products, prices, and payment links.
+A public [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for the [Chargily Pay V2 API](https://dev.chargily.com/pay-v2/introduction), hosted on Cloudflare Workers. Anyone can connect with their own Chargily API key — no shared secrets, no server-side configuration needed.
 
 ## MCP Endpoint
 
 ```
 https://mcp.ta9in.com/chargily-mcp/mcp
 ```
+
+## Quick Start
+
+1. Get your Chargily API key from [pay.chargily.com](https://pay.chargily.com) → Developer → API Keys
+
+2. Set it in your project's `.env` file:
+   ```env
+   CHARGILY_API_KEY=test_sk_your_key_here
+   ```
+
+3. Add to your MCP client config (e.g. `claude_desktop_config.json`):
+   ```json
+   {
+     "mcpServers": {
+       "chargily": {
+         "command": "npx",
+         "args": [
+           "mcp-remote",
+           "https://mcp.ta9in.com/chargily-mcp/mcp",
+           "--header",
+           "Authorization: Bearer ${CHARGILY_API_KEY}"
+         ]
+       }
+     }
+   }
+   ```
+
+4. Restart your MCP client. The server auto-detects test vs live mode from your key prefix (`test_sk_` / `live_sk_`).
+
+> **Your key is never stored on the server** — it's sent per-request and kept only in your MCP session.
+
+## Tools
 
 | Tool | Description |
 |---|---|
@@ -39,66 +71,38 @@ https://mcp.ta9in.com/chargily-mcp/mcp
 | `list_payment_links` | List all payment links |
 | `list_payment_link_checkouts` | List checkouts from a payment link |
 
-## Setup
+## How Authentication Works
 
-### Prerequisites
-- [Node.js](https://nodejs.org) ≥ 18
-- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
-- A [Cloudflare account](https://dash.cloudflare.com/sign-up)
-- A [Chargily Pay account](https://pay.chargily.com) with API key
+Your Chargily API key is passed as an HTTP header with each request:
 
-### Local Development
+```
+Authorization: Bearer <your_key>
+```
+
+or alternatively:
+
+```
+X-Chargily-Api-Key: <your_key>
+```
+
+The server reads it from the header, uses it for that session's API calls, and automatically selects **test mode** (`test_sk_...`) or **live mode** (`live_sk_...`) based on the key prefix.
+
+## Self-Hosting
 
 ```bash
-# Install dependencies
+git clone https://github.com/ta9in-oss/chargily-mcp
+cd chargily-mcp
 npm install
 
-# Set your API key locally
-echo "CHARGILY_API_KEY=test_sk_your_key_here" > .dev.vars
-
-# Start dev server
+# Local dev
 npm run dev
-# → MCP endpoint: http://localhost:8788/mcp
-```
+# → http://localhost:8788/chargily-mcp/mcp
 
-### Deploy to Cloudflare
-
-```bash
-# Set your API key as a secret
-npx wrangler secret put CHARGILY_API_KEY
-
-# (Optional) Set mode to 'live' for production
-npx wrangler secret put CHARGILY_MODE  # enter: live
-
-# Deploy
+# Deploy to your own Cloudflare account
 npm run deploy
-# → https://chargily-mcp.<your-account>.workers.dev/mcp
 ```
 
-## Connecting to Claude Desktop
-
-Add to your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "chargily": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://mcp.ta9in.com/chargily-mcp/mcp"
-      ]
-    }
-  }
-}
-```
-
-## Environment Variables
-
-| Variable | Required | Description |
-|---|---|---|
-| `CHARGILY_API_KEY` | Yes | Your Chargily Pay secret key (`test_sk_...` or `live_sk_...`) |
-| `CHARGILY_MODE` | No | `test` (default) or `live` |
+No secrets to configure — the Worker has no server-side API keys. Each user brings their own.
 
 ## API Reference
 
