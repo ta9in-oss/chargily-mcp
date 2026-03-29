@@ -541,6 +541,101 @@ export class ChargilyMCP extends McpAgent<Env, AgentState> {
         return { content: [{ type: "text", text: JSON.stringify(checkouts, null, 2) }] };
       }
     );
+
+    // ── Resources ────────────────────────────────────────────────────────────
+    // Expose each documentation topic as a readable resource URI.
+    for (const topic of ALL_TOPICS) {
+      this.server.resource(
+        `docs-${topic}`,
+        `chargily://docs/${topic}`,
+        {
+          description: `Chargily Pay API documentation: ${topic}`,
+          mimeType: "text/plain",
+        },
+        async () => ({
+          contents: [
+            {
+              uri: `chargily://docs/${topic}`,
+              mimeType: "text/plain",
+              text: DOCS[topic as DocTopic],
+            },
+          ],
+        })
+      );
+    }
+
+    // ── Prompts ───────────────────────────────────────────────────────────────
+
+    this.server.prompt(
+      "create_payment_checkout",
+      "Generate a ready-to-use prompt for creating a Chargily Pay checkout session for a customer.",
+      {
+        amount: z.string().describe("Amount to charge (e.g. '500' for 500 DZD)"),
+        currency: z.string().default("dzd").describe("Currency code (dzd or usd)"),
+        customer_name: z.string().optional().describe("Customer full name"),
+        success_url: z.string().describe("URL to redirect after successful payment"),
+      },
+      ({ amount, currency, customer_name, success_url }) => ({
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text:
+                `Create a Chargily Pay checkout for ${customer_name ? `customer "${customer_name}"` : "a customer"} ` +
+                `for the amount of ${amount} ${currency.toUpperCase()}. ` +
+                `Use success URL: ${success_url}. ` +
+                `Return the checkout URL so the customer can complete payment.`,
+            },
+          },
+        ],
+      })
+    );
+
+    this.server.prompt(
+      "account_overview",
+      "Generate a prompt to get a full overview of the Chargily Pay account — balance, recent customers, products, and checkouts.",
+      {},
+      () => ({
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text:
+                "Give me a full overview of my Chargily Pay account. " +
+                "Fetch and summarize: current wallet balance, list of customers, products with their prices, " +
+                "and recent checkouts. Highlight any pending or failed payments.",
+            },
+          },
+        ],
+      })
+    );
+
+    this.server.prompt(
+      "setup_payment_link",
+      "Generate a prompt to create a reusable Chargily Pay payment link for a product or service.",
+      {
+        product_name: z.string().describe("Name of the product or service"),
+        amount: z.string().describe("Amount to charge"),
+        currency: z.string().default("dzd").describe("Currency (dzd or usd)"),
+      },
+      ({ product_name, amount, currency }) => ({
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text:
+                `Create a reusable Chargily Pay payment link for "${product_name}" ` +
+                `priced at ${amount} ${currency.toUpperCase()}. ` +
+                `First create the product and a price for it, then create a payment link. ` +
+                `Return the shareable payment URL.`,
+            },
+          },
+        ],
+      })
+    );
   }
 }
 

@@ -1,5 +1,7 @@
 # Chargily MCP
 
+[![MCP Badge](https://lobehub.com/badge/mcp-full/ta9in-oss-chargily-mcp?theme=light)](https://lobehub.com/mcp/ta9in-oss-chargily-mcp)
+
 A public [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for the [Chargily Pay V2 API](https://dev.chargily.com/pay-v2/introduction), hosted on Cloudflare Workers. Anyone can connect with their own Chargily API key — no shared secrets, no server-side configuration needed.
 
 ## MCP Endpoint

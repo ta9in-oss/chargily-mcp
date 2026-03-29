@@ -1,7 +1,30 @@
 {
   "name": "chargily-mcp",
   "version": "1.0.0",
-  "description": "MCP server for Chargily Pay API - hosted on Cloudflare Workers",
+  "description": "MCP server for Chargily Pay API - hosted on Cloudflare Workers. No server-side API keys needed; users provide their own Chargily API key via environment variable.",
+  "keywords": [
+    "chargily",
+    "chargily-pay",
+    "payment",
+    "payment-gateway",
+    "algeria",
+    "MCP",
+    "MCP Server",
+    "Model Context Protocol",
+    "cloudflare-workers",
+    "AI",
+    "AI Agent"
+  ],
+  "homepage": "https://github.com/ta9in-oss/chargily-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/ta9in-oss/chargily-mcp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ta9in-oss/chargily-mcp.git"
+  },
+  "license": "MIT",
+  "author": "ta9in-oss",
   "main": "src/index.ts",
   "scripts": {
     "dev": "wrangler dev",
